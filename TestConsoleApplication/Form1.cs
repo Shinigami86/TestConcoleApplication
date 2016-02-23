@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace TestConsoleApplication
 {
-    public partial class Form1 : Form
+    public partial class ComPortAppliCation : Form
     {
-        public Form1()
+        public ComPortAppliCation()
         {
             InitializeComponent();
         }
