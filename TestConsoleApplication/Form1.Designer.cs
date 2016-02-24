@@ -1,4 +1,9 @@
 ﻿using System;
+using System.IO.Ports;
+using System.Windows.Forms;
+using System.Drawing;
+using System.ComponentModel;
+using TestConsoleApplication;
 
 namespace TestConsoleApplication
 {
@@ -30,8 +35,7 @@ namespace TestConsoleApplication
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.serialPort = new System.IO.Ports.SerialPort(this.components);
+            this.serialPort = new CommPort();
             this.Com1Ctrl = new System.Windows.Forms.Panel();
             this.LoadComSettings = new System.Windows.Forms.Button();
             this.SaveComSettings = new System.Windows.Forms.Button();
@@ -55,6 +59,7 @@ namespace TestConsoleApplication
             this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.SendComm = new System.Windows.Forms.Button();
+            this.ClearConsole = new System.Windows.Forms.Button();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.Com1Ctrl.SuspendLayout();
@@ -113,6 +118,7 @@ namespace TestConsoleApplication
             this.CloseComPort.TabIndex = 12;
             this.CloseComPort.Text = "Close";
             this.CloseComPort.UseVisualStyleBackColor = true;
+            this.CloseComPort.Click += new System.EventHandler(this.CloseComPort_Click);
             // 
             // BaudRateSelect
             // 
@@ -264,11 +270,13 @@ namespace TestConsoleApplication
             this.ConsoleWindow.Size = new System.Drawing.Size(288, 185);
             this.ConsoleWindow.TabIndex = 0;
             this.ConsoleWindow.Text = "";
+            this.ConsoleWindow.TextChanged += new System.EventHandler(this.ConsoleWindow_TextChanged);
             // 
             // flowLayoutPanel3
             // 
             this.flowLayoutPanel3.Controls.Add(this.textBox1);
             this.flowLayoutPanel3.Controls.Add(this.SendComm);
+            this.flowLayoutPanel3.Controls.Add(this.ClearConsole);
             this.flowLayoutPanel3.Location = new System.Drawing.Point(3, 194);
             this.flowLayoutPanel3.Name = "flowLayoutPanel3";
             this.flowLayoutPanel3.Size = new System.Drawing.Size(288, 26);
@@ -278,18 +286,31 @@ namespace TestConsoleApplication
             // 
             this.textBox1.Location = new System.Drawing.Point(3, 3);
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(198, 20);
+            this.textBox1.Size = new System.Drawing.Size(179, 20);
             this.textBox1.TabIndex = 16;
+            this.textBox1.KeyUp += new System.Windows.Forms.KeyEventHandler(this.textBox1_keyUp);
             // 
             // SendComm
             // 
             this.SendComm.Enabled = false;
-            this.SendComm.Location = new System.Drawing.Point(207, 3);
+            this.SendComm.Location = new System.Drawing.Point(188, 3);
             this.SendComm.Name = "SendComm";
-            this.SendComm.Size = new System.Drawing.Size(75, 23);
+            this.SendComm.Size = new System.Drawing.Size(45, 23);
             this.SendComm.TabIndex = 15;
             this.SendComm.Text = "Send";
             this.SendComm.UseVisualStyleBackColor = true;
+            this.SendComm.Click += new System.EventHandler(this.SendComm_Click);
+            // 
+            // ClearConsole
+            // 
+            this.ClearConsole.Enabled = false;
+            this.ClearConsole.Location = new System.Drawing.Point(239, 3);
+            this.ClearConsole.Name = "ClearConsole";
+            this.ClearConsole.Size = new System.Drawing.Size(43, 23);
+            this.ClearConsole.TabIndex = 17;
+            this.ClearConsole.Text = "Clear";
+            this.ClearConsole.UseVisualStyleBackColor = true;
+            this.ClearConsole.Click += new System.EventHandler(this.ClearConsole_Click);
             // 
             // openFileDialog
             // 
@@ -314,36 +335,34 @@ namespace TestConsoleApplication
 
         }
 
-
-
         #endregion
-
-        private System.IO.Ports.SerialPort serialPort;
-        private System.Windows.Forms.Panel Com1Ctrl;
-        private System.Windows.Forms.Button LoadComSettings;
-        private System.Windows.Forms.Button SaveComSettings;
-        private System.Windows.Forms.Button CloseComPort;
-        private System.Windows.Forms.ComboBox BaudRateSelect;
-        private System.Windows.Forms.Button OpenComPort;
-        private System.Windows.Forms.Label ParityBits;
-        private System.Windows.Forms.Label StopBits;
-        private System.Windows.Forms.Label DataBits;
-        private System.Windows.Forms.Label Handshake;
-        private System.Windows.Forms.Label BaudRate;
-        private System.Windows.Forms.ComboBox ParityBitSelect;
-        private System.Windows.Forms.Label ComPort;
-        private System.Windows.Forms.ComboBox StopBitSelect;
-        private System.Windows.Forms.ComboBox DataBitsSelect;
-        private System.Windows.Forms.ComboBox HandshakeSelect;
-        private System.Windows.Forms.ComboBox COMPortSelect;
-        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
-        private System.Windows.Forms.OpenFileDialog openFileDialog;
-        private System.Windows.Forms.SaveFileDialog saveFileDialog;
-        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel2;
-        private System.Windows.Forms.RichTextBox ConsoleWindow;
-        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel3;
-        private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.Button SendComm;
+        private CommPort serialPort;
+        private Panel Com1Ctrl;
+        private Button LoadComSettings;
+        private Button SaveComSettings;
+        private Button CloseComPort;
+        private ComboBox BaudRateSelect;
+        private Button OpenComPort;
+        private Label ParityBits;
+        private Label StopBits;
+        private Label DataBits;
+        private Label Handshake;
+        private Label BaudRate;
+        private ComboBox ParityBitSelect;
+        private Label ComPort;
+        private ComboBox StopBitSelect;
+        private ComboBox DataBitsSelect;
+        private ComboBox HandshakeSelect;
+        private ComboBox COMPortSelect;
+        private FlowLayoutPanel flowLayoutPanel1;
+        private OpenFileDialog openFileDialog;
+        private SaveFileDialog saveFileDialog;
+        private FlowLayoutPanel flowLayoutPanel2;
+        private RichTextBox ConsoleWindow;
+        private FlowLayoutPanel flowLayoutPanel3;
+        private TextBox textBox1;
+        private Button SendComm;
+        private Button ClearConsole;
     }
 }
 

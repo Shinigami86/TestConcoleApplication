@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO.Ports;
 
 namespace TestConsoleApplication
 {
@@ -33,6 +27,8 @@ namespace TestConsoleApplication
             object[] handshakes = { "None", "RequestToSend", "RequestToSendXOnXOff", "XOnXOff" };
             HandshakeSelect.Items.AddRange(handshakes);
             HandshakeSelect.SelectedIndex = 0;
+
+            ConsoleWindow.Enabled = false;
         }
 
         public ComPortAppliCation()
@@ -42,84 +38,139 @@ namespace TestConsoleApplication
 
         private void COMPortSelect_SelectedIndexChanged(object sender, EventArgs e)
         {
-            serialPort.PortName = COMPortSelect.SelectedItem.ToString();
-            if(serialPort.PortName == "")
-            {
-                ConsoleWindow.AppendText("No Com Port selected");
-            }
-            else
-            {
-                ConsoleWindow.AppendText(serialPort.PortName.ToString() + " Selected\n");
-                BaudRateSelect.Enabled = true;
-                HandshakeSelect.Enabled = true;
-                DataBitsSelect.Enabled = true;
-                StopBitSelect.Enabled = true;
-                ParityBitSelect.Enabled = true;
-            }
         }
 
         private void COMPortSelect_Dropdown(object sender, EventArgs e)
         {
-            if(!serialPort.IsOpen)
+            COMPortSelect.Items.Clear();
+            foreach (string s in System.IO.Ports.SerialPort.GetPortNames())
             {
-                COMPortSelect.Items.Clear();
-                foreach (string s in System.IO.Ports.SerialPort.GetPortNames())
-                {
-                    COMPortSelect.Items.Add(s);
-                }
-                if (COMPortSelect.Items.Count == 0)
-                {
-                    MessageBox.Show("No COM Ports Available on this Machine");
-                }
+                COMPortSelect.Items.Add(s);
             }
-            else
+            if (COMPortSelect.Items.Count == 0)
             {
-                ConsoleWindow.AppendText("Serial Port Cannot be changed while it is open");
+                MessageBox.Show("No COM Ports Available on this Machine");
             }
         }
 
         private void BaudRateSelect_SelectedIndexChanged(object sender, EventArgs e)
         {
-            serialPort.BaudRate = (int)BaudRateSelect.SelectedItem;
-            ConsoleWindow.AppendText("Baud Rate set to " + serialPort.BaudRate + " bps\n");
         }
 
         private void HandshakeSelect_SelectedIndexChanged(object sender, EventArgs e)
         {
-            serialPort.Handshake = (System.IO.Ports.Handshake)Enum.Parse(typeof(System.IO.Ports.Handshake), HandshakeSelect.SelectedItem.ToString());
-            ConsoleWindow.AppendText("Handshake set to " + serialPort.Handshake + " \n");
         }
 
         private void ParityBitSelect_SelectedIndexChanged(object sender, EventArgs e)
         {
-            serialPort.Parity = (System.IO.Ports.Parity)Enum.Parse(typeof(System.IO.Ports.Parity), ParityBitSelect.SelectedItem.ToString());
-            ConsoleWindow.AppendText("Parity set to " + serialPort.Parity.ToString() + " \n");
         }
 
         private void StopBitSelect_SelectedIndexChanged(object sender, EventArgs e)
         {
-            serialPort.StopBits = (System.IO.Ports.StopBits)Enum.Parse(typeof(System.IO.Ports.StopBits), StopBitSelect.SelectedItem.ToString());
-            ConsoleWindow.AppendText("Stopbits set to " + serialPort.StopBits.ToString() + " \n");
         }
 
         private void DataBitsSelect_SelectedIndexChanged(object sender, EventArgs e)
         {
-            serialPort.DataBits = (int)DataBitsSelect.SelectedItem;
-            ConsoleWindow.AppendText("Data Bits set to " + serialPort.DataBits + "\n");
         }
 
         private void OpenComPort_Click(object sender, EventArgs e)
         {
-            if(!serialPort.IsOpen)
+            if (!serialPort.isOpen)
             {
-                serialPort.Open();
-                COMPortSelect.Enabled = false;
-                BaudRateSelect.Enabled = false;
-                HandshakeSelect.Enabled = false;
-                DataBitsSelect.Enabled = false;
-                StopBitSelect.Enabled = false;
-                ParityBitSelect.Enabled = false;
+                this.serialPort.comPort = (string)COMPortSelect.SelectedItem;
+                this.serialPort.baudRate = (int)BaudRateSelect.SelectedItem;
+                this.serialPort.dataBits = (int)DataBitsSelect.SelectedItem;
+                this.serialPort.stopBits = (StopBits)Enum.Parse(typeof(StopBits), StopBitSelect.SelectedItem.ToString());
+                this.serialPort.parityBits = (Parity)Enum.Parse(typeof(Parity), ParityBitSelect.SelectedItem.ToString());
+                this.serialPort.handShake = (Handshake)Enum.Parse(typeof(Handshake), HandshakeSelect.SelectedItem.ToString());
+                this.serialPort.openPort();
             }
+            else ConsoleWindow.AppendText("Serial Port already open\n");
+            COMPortSelect.Enabled = false;
+            BaudRateSelect.Enabled = false;
+            HandshakeSelect.Enabled = false;
+            DataBitsSelect.Enabled = false;
+            StopBitSelect.Enabled = false;
+            ParityBitSelect.Enabled = false;
+            SendComm.Enabled = true;
+            ClearConsole.Enabled = true;
+            OpenComPort.Enabled = false;
+            CloseComPort.Enabled = true;
+        }
+
+        private void CloseComPort_Click(object sender, EventArgs e)
+        {
+            if (serialPort.isOpen)
+            {
+                serialPort.closePort();
+            }
+            else ConsoleWindow.AppendText("Serial Port already close\n");
+            COMPortSelect.Enabled = true;
+            BaudRateSelect.Enabled = true;
+            HandshakeSelect.Enabled = true;
+            DataBitsSelect.Enabled = true;
+            StopBitSelect.Enabled = true;
+            ParityBitSelect.Enabled = true;
+            SendComm.Enabled = false;
+            ClearConsole.Enabled = false;
+            OpenComPort.Enabled = true;
+            CloseComPort.Enabled = false;
+        }
+
+        private void SendComm_Click(object sender, EventArgs e)
+        {
+            if(!serialPort.isOpen)
+            {
+                MessageBox.Show("No COM Port is open to send Data across");
+                return;
+            }
+            textBox1.Enabled = false; //Prevents editting of text whilst send in progress
+            if(textBox1.Text != "")
+            {
+                try
+                {
+                    serialPort.sendData(textBox1.Text);
+                }
+                catch (Exception x)
+                {
+                    MessageBox.Show(x.ToString());
+                    return;
+                }
+                ConsoleWindow.AppendText("Sent: \"" + textBox1.Text + " \"\n");
+                textBox1.Text = "";
+            }
+            textBox1.Enabled = true;
+            textBox1.Select();
+        }
+
+        private void textBox1_keyUp(object sender, KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.Enter:
+                    SendComm_Click((object)sender, (EventArgs)e);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void ConsoleWindow_TextChanged(object sender, EventArgs e)
+        {
+            ConsoleWindow.SelectionStart = ConsoleWindow.Text.Length;
+            ConsoleWindow.ScrollToCaret();
+            textBox1.Select();
+        }
+
+        public void ClearConsole_Click(object sender, EventArgs e)
+        {
+            ConsoleWindow.Text = "";
+            textBox1.Select();
+        }
+
+        public void SerialPort_DataReceived( object sender, SerialDataReceivedEventArgs e)
+        {
+            this.ConsoleWindow.AppendText(e.ToString());
         }
     }
 }
